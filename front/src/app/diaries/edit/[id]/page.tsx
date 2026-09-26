@@ -14,6 +14,7 @@ import {
   Sparkles,
 } from "lucide-react";
 import { requestData } from "@/lib/api/http-client";
+import { htmlToDiaryBlocks } from "@/lib/diary/block-converter";
 
 interface DiaryDetail {
   id: number;
@@ -239,11 +240,18 @@ export default function DiaryEditPage() {
   const handleUpdate = async () => {
     if (!title.trim()) return alert("제목을 입력해주세요.");
     const content = editorRef.current?.innerHTML || "";
+    const contentBlocks = htmlToDiaryBlocks(content);
     setIsSubmitting(true);
 
     try {
       const formData = new FormData();
-      const updateData = { title, content, categoryName: "일상", isPrivate };
+      const updateData = {
+        title,
+        content,
+        categoryName: "일상",
+        isPrivate,
+        contentBlocks,
+      };
 
       formData.append(
         "data",

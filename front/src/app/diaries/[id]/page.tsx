@@ -13,6 +13,7 @@ import {
 } from "lucide-react";
 import { requestData } from "@/lib/api/http-client";
 import { toErrorMessage } from "@/lib/api/rs-data";
+import type { DiaryContentBlock } from "@/lib/diary/block-converter";
 
 interface DiaryDetail {
   id: number;
@@ -22,6 +23,11 @@ interface DiaryDetail {
   createDate: string;
   isPrivate: boolean;
   content: string;
+  contentBlocks?: DiaryContentBlock[];
+  imageUrl?: string;
+  moodScore?: number | null;
+  emotionTags?: string | null;
+  triggerTags?: string | null;
 }
 
 export default function DiaryDetailPage() {
@@ -138,7 +144,32 @@ export default function DiaryDetailPage() {
 
         {/* 본문 영역 */}
         <article className="prose prose-slate max-w-none">
-          {diary.content ? (
+          {diary.contentBlocks && diary.contentBlocks.length > 0 ? (
+            <div className="space-y-6 text-[17px] leading-[1.8] text-slate-700">
+              {diary.contentBlocks.map((block) => {
+                if (block.type === "image" && block.imageUrl) {
+                  return (
+                    <figure key={block.id} className="my-6">
+                      {/* eslint-disable-next-line @next/next/no-img-element */}
+                      <img
+                        src={block.imageUrl}
+                        alt={block.filename || "첨부 이미지"}
+                        className="mx-auto block max-w-full rounded-2xl shadow-md"
+                      />
+                    </figure>
+                  );
+                }
+                if (block.type === "text" && block.text) {
+                  return (
+                    <p key={block.id} className="whitespace-pre-wrap">
+                      {block.text}
+                    </p>
+                  );
+                }
+                return null;
+              })}
+            </div>
+          ) : diary.content ? (
             <div
               className="community-content-view text-[17px] leading-[1.8] text-slate-700"
               dangerouslySetInnerHTML={{ __html: diary.content }}

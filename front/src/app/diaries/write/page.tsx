@@ -17,7 +17,7 @@ import {
 } from "lucide-react";
 
 import { requestData } from "@/lib/api/http-client";
-
+import { htmlToDiaryBlocks } from "@/lib/diary/block-converter";
 import { getPublicApiBaseUrl, joinUrl } from "@/lib/runtime/deployment-env";
 
 type ImageUploadResponse =
@@ -288,17 +288,23 @@ export default function DiaryWritePage() {
     if (!title.trim()) return alert("제목을 적어주세요.");
 
     const content = editorRef.current?.innerHTML || "";
+    const contentBlocks = htmlToDiaryBlocks(content);
 
     setIsSubmitting(true);
 
     try {
       const formData = new FormData();
 
-      const diaryData = { title, content, categoryName: "일상", isPrivate };
+      const diaryData = {
+        title,
+        content,
+        categoryName: "일상",
+        isPrivate,
+        contentBlocks,
+      };
 
       formData.append(
         "data",
-
         new Blob([JSON.stringify(diaryData)], { type: "application/json" }),
       );
 
