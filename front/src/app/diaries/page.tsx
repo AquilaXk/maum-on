@@ -13,6 +13,7 @@ import {
 } from "lucide-react";
 import { requestData } from "@/lib/api/http-client";
 import Link from "next/link";
+import MonthlyMoodHeatmap from "@/components/diary/MonthlyMoodHeatmap";
 
 interface Diary {
   id: number;
@@ -22,6 +23,9 @@ interface Diary {
   nickname: string;
   createDate: string;
   isPrivate: boolean;
+  moodScore?: number | null;
+  emotionTags?: string | null;
+  triggerTags?: string | null;
 }
 
 interface PageResponse<T> {
@@ -109,6 +113,16 @@ export default function DiaryListPage() {
             ))}
           </div>
         </div>
+
+        {/* 월별 감정 컬러 히트맵 그리드 */}
+        <MonthlyMoodHeatmap
+          entries={diaries.map((d) => ({
+            date: d.createDate,
+            moodScore: d.moodScore,
+            title: d.title,
+            id: d.id,
+          }))}
+        />
 
         {/* 리스트 출력부 */}
         {isLoading ? (
