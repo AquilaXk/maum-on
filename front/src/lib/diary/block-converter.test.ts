@@ -52,4 +52,18 @@ describe("block-converter", () => {
     expect(text).toContain("강조 및 이탤릭");
     expect(text).toContain("새 줄");
   });
+
+  it("strips script and style tags completely for security", () => {
+    const malicious = '<p>안전한 본문</p><script>alert("hacked")</script><style>body { display: none; }</style><p>다음 문단</p>';
+    const text = stripHtml(malicious);
+    expect(text).not.toContain("alert");
+    expect(text).not.toContain("display: none");
+    expect(text).toContain("안전한 본문");
+    expect(text).toContain("다음 문단");
+
+    const blocks = htmlToDiaryBlocks(malicious);
+    expect(blocks.some((b) => b.text?.includes("alert"))).toBe(false);
+    expect(blocks.some((b) => b.text?.includes("display: none"))).toBe(false);
+    expect(blocks.some((b) => b.text?.includes("안전한 본문"))).toBe(true);
+  });
 });

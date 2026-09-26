@@ -13,6 +13,7 @@ import {
 } from "lucide-react";
 import { requestData } from "@/lib/api/http-client";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import MonthlyMoodHeatmap from "@/components/diary/MonthlyMoodHeatmap";
 
 interface Diary {
@@ -39,6 +40,7 @@ interface PageResponse<T> {
 type DiaryTab = "my" | "public";
 
 export default function DiaryListPage() {
+  const router = useRouter();
   const [activeTab, setActiveTab] = useState<DiaryTab>("my");
   const [diaries, setDiaries] = useState<Diary[]>([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -47,7 +49,9 @@ export default function DiaryListPage() {
     setIsLoading(true);
     try {
       const endpoint =
-        activeTab === "my" ? "/api/v1/diaries" : "/api/v1/diaries/public";
+        activeTab === "my"
+          ? "/api/v1/diaries?size=50"
+          : "/api/v1/diaries/public?size=50";
       const response = await requestData<PageResponse<Diary>>(endpoint);
       if (response && response.content) {
         setDiaries(response.content);
@@ -122,6 +126,11 @@ export default function DiaryListPage() {
             title: d.title,
             id: d.id,
           }))}
+          onSelectDate={(_dateKey, entry) => {
+            if (entry?.id) {
+              router.push(`/diaries/${entry.id}`);
+            }
+          }}
         />
 
         {/* 리스트 출력부 */}

@@ -44,4 +44,22 @@ describe("MonthlyMoodHeatmap", () => {
     expect(html).toContain("미기록");
     expect(html).toContain("기분 범례:");
   });
+
+  it("prioritizes newest entry and non-null moodScore when multiple entries exist on the same date", () => {
+    const entries = [
+      { date: "2026-09-10T08:00:00", moodScore: 5, title: "오전 일기", id: 1 },
+      { date: "2026-09-10T18:00:00", moodScore: null, title: "오후 일기 (미기록)", id: 2 },
+    ];
+
+    const html = renderToStaticMarkup(
+      <MonthlyMoodHeatmap
+        entries={entries}
+        initialYear={2026}
+        initialMonth={8}
+      />,
+    );
+
+    // The cell for 10th should prioritize the non-null mood (moodScore: 5 -> #5C6BC0) over the null mood
+    expect(html).toContain(MOOD_COLORS[5].bg);
+  });
 });

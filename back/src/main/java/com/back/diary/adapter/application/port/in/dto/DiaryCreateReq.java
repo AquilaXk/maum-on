@@ -1,9 +1,11 @@
 package com.back.diary.adapter.application.port.in.dto;
 
 import com.back.diary.domain.Diary;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.NotBlank;
 
+@JsonIgnoreProperties(ignoreUnknown = true)
 @Schema(description = "감정 일기 생성/수정 요청")
 public record DiaryCreateReq(
     @NotBlank(message = "제목을 입력해주세요.")

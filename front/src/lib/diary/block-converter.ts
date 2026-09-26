@@ -12,6 +12,8 @@ export interface DiaryContentBlock {
 
 export function stripHtml(html: string): string {
   return html
+    .replace(/<script\b[^<]*(?:(?!<\/script>)<[^<]*)*<\/script>/gi, "")
+    .replace(/<style\b[^<]*(?:(?!<\/style>)<[^<]*)*<\/style>/gi, "")
     .replace(/<br\s*[\/]?>/gi, "\n")
     .replace(/<\/p>/gi, "\n")
     .replace(/<[^>]+>/g, "")
@@ -50,6 +52,10 @@ export function htmlToDiaryBlocks(html: string): DiaryContentBlock[] {
         const el = node as HTMLElement;
         const tagName = el.tagName.toLowerCase();
 
+        if (tagName === "script" || tagName === "style") {
+          return;
+        }
+
         if (tagName === "img") {
           const img = el as HTMLImageElement;
           const src = img.getAttribute("src");
@@ -65,7 +71,8 @@ export function htmlToDiaryBlocks(html: string): DiaryContentBlock[] {
           return;
         }
 
-        if (el.querySelector("img")) {
+        const isContainer = ["div", "section", "article", "main", "figure", "ul", "ol"].includes(tagName);
+        if (el.querySelector("img") || (isContainer && el.children.length > 0)) {
           Array.from(el.childNodes).forEach(processElement);
           return;
         }

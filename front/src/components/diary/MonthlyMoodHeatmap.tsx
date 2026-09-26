@@ -53,13 +53,19 @@ export default function MonthlyMoodHeatmap({
     setCurrentDate(new Date(year, month + 1, 1));
   };
 
-  // Map entries by date key YYYY-MM-DD
+  // Map entries by date key YYYY-MM-DD, prioritizing newest entry and non-null moodScore
   const entriesByDate = useMemo(() => {
     const map = new Map<string, MoodEntry>();
-    for (const entry of entries) {
+    const sorted = [...entries].sort((a, b) => (b.date || "").localeCompare(a.date || ""));
+    for (const entry of sorted) {
       if (!entry.date) continue;
       const dateKey = entry.date.slice(0, 10);
-      map.set(dateKey, entry);
+      const existing = map.get(dateKey);
+      if (!existing) {
+        map.set(dateKey, entry);
+      } else if (existing.moodScore == null && entry.moodScore != null) {
+        map.set(dateKey, entry);
+      }
     }
     return map;
   }, [entries]);
