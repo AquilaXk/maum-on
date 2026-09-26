@@ -17,7 +17,7 @@ import {
 } from "lucide-react";
 
 import { requestData } from "@/lib/api/http-client";
-
+import { htmlToDiaryBlocks } from "@/lib/diary/block-converter";
 import { getPublicApiBaseUrl, joinUrl } from "@/lib/runtime/deployment-env";
 
 type ImageUploadResponse =
@@ -37,6 +37,8 @@ export default function DiaryWritePage() {
   const [title, setTitle] = useState("");
 
   const [isPrivate, setIsPrivate] = useState(true);
+
+  const [moodScore, setMoodScore] = useState<number | null>(null);
 
   const [isSubmitting, setIsSubmitting] = useState(false);
 
@@ -288,17 +290,24 @@ export default function DiaryWritePage() {
     if (!title.trim()) return alert("제목을 적어주세요.");
 
     const content = editorRef.current?.innerHTML || "";
+    const contentBlocks = htmlToDiaryBlocks(content);
 
     setIsSubmitting(true);
 
     try {
       const formData = new FormData();
 
-      const diaryData = { title, content, categoryName: "일상", isPrivate };
+      const diaryData = {
+        title,
+        content,
+        categoryName: "일상",
+        isPrivate,
+        contentBlocks,
+        moodScore,
+      };
 
       formData.append(
         "data",
-
         new Blob([JSON.stringify(diaryData)], { type: "application/json" }),
       );
 
@@ -402,6 +411,32 @@ export default function DiaryWritePage() {
           {/* 제목과 본문 사이의 명확한 구분선 */}
 
           <div className="h-[1px] w-full bg-gradient-to-r from-slate-200 via-slate-100 to-transparent" />
+        </div>
+
+        {/* 기분 점수 선택 (1~5) */}
+        <div className="mb-6 flex flex-wrap items-center gap-2">
+          <span className="text-xs font-bold text-slate-500 mr-1">오늘의 기분:</span>
+          {[
+            { score: 1, label: "매우 힘듦", color: "#EF4444" },
+            { score: 2, label: "지침", color: "#F97316" },
+            { score: 3, label: "보통", color: "#EAB308" },
+            { score: 4, label: "좋음", color: "#0284C7" },
+            { score: 5, label: "매우 좋음", color: "#5C6BC0" },
+          ].map((item) => (
+            <button
+              key={item.score}
+              type="button"
+              onClick={() => setMoodScore(moodScore === item.score ? null : item.score)}
+              className={`px-3 py-1.5 rounded-full text-xs font-bold transition-all cursor-pointer ${
+                moodScore === item.score
+                  ? "text-white shadow-sm scale-105"
+                  : "bg-slate-100 text-slate-600 hover:bg-slate-200"
+              }`}
+              style={moodScore === item.score ? { backgroundColor: item.color } : undefined}
+            >
+              {item.label} ({item.score}점)
+            </button>
+          ))}
         </div>
 
         <div className="relative min-h-[700px] bg-white/40 rounded-[2.5rem] p-8 md:p-12 border border-slate-100/50 shadow-inner">
