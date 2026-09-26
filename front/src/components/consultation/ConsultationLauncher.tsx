@@ -2,7 +2,7 @@
 
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { usePathname, useRouter } from "next/navigation";
-import { LoaderCircle, MessageCircle, SendHorizontal, X } from "lucide-react";
+import { LoaderCircle, MessageCircle, Phone, SendHorizontal, ShieldAlert, X } from "lucide-react";
 import { toErrorMessage } from "@/lib/api/rs-data";
 import { useAuthStore } from "@/lib/auth/auth-store";
 import {
@@ -277,6 +277,31 @@ export default function ConsultationLauncher() {
                 <X className="h-5 w-5" />
               </button>
             </header>
+
+            {/* 109 위기상담 긴급 콜 칩 */}
+            <div className="flex items-center justify-between border-b border-rose-100 bg-rose-50/80 px-4 py-2 text-xs">
+              <span className="flex items-center gap-1.5 font-medium text-rose-700">
+                <ShieldAlert className="h-3.5 w-3.5" />
+                <span>위기 상담 지원</span>
+              </span>
+              <div className="flex items-center gap-1.5">
+                <a
+                  href="tel:109"
+                  className="inline-flex items-center gap-1 rounded-full bg-rose-600 px-2.5 py-0.5 font-medium text-white shadow-xs transition hover:bg-rose-700"
+                  aria-label="24시간 자살예방 상담전화 109 바로 통화하기"
+                >
+                  <Phone className="h-3 w-3" />
+                  <span>109 바로연결</span>
+                </a>
+                <a
+                  href="tel:1577-0199"
+                  className="inline-flex items-center rounded-full border border-rose-300 bg-white px-2 py-0.5 text-rose-700 transition hover:bg-rose-100/50"
+                  aria-label="정신건강 위기상담전화 1577-0199 바로 통화하기"
+                >
+                  <span>1577-0199</span>
+                </a>
+              </div>
+            </div>
 
             <div ref={viewportRef} className="flex-1 space-y-3 overflow-y-auto bg-[#f7faff] px-4 py-4">
               {messages.map((message) => {
