@@ -13,6 +13,15 @@ import {
 } from "lucide-react";
 import { requestData } from "@/lib/api/http-client";
 import { toErrorMessage } from "@/lib/api/rs-data";
+import { htmlToDiaryBlocks, type DiaryContentBlock } from "@/lib/diary/block-converter";
+
+const MOOD_CONFIG: Record<number, { label: string; color: string }> = {
+  1: { label: "매우 힘듦", color: "#EF4444" },
+  2: { label: "지침", color: "#F97316" },
+  3: { label: "보통", color: "#EAB308" },
+  4: { label: "좋음", color: "#0284C7" },
+  5: { label: "매우 좋음", color: "#5C6BC0" },
+};
 
 interface DiaryDetail {
   id: number;
@@ -22,6 +31,11 @@ interface DiaryDetail {
   createDate: string;
   isPrivate: boolean;
   content: string;
+  contentBlocks?: DiaryContentBlock[];
+  imageUrl?: string;
+  moodScore?: number | null;
+  emotionTags?: string | null;
+  triggerTags?: string | null;
 }
 
 export default function DiaryDetailPage() {
@@ -133,21 +147,65 @@ export default function DiaryDetailPage() {
               })}
             </span>
             {diary.isPrivate ? <Lock size={14} /> : <Globe size={14} />}
+            {diary.moodScore && MOOD_CONFIG[diary.moodScore] && (
+              <>
+                <span className="w-[1px] h-3 bg-slate-200" />
+                <span
+                  className="inline-flex items-center gap-1 rounded-full px-2.5 py-0.5 text-xs font-semibold text-white shadow-xs"
+                  style={{ backgroundColor: MOOD_CONFIG[diary.moodScore].color }}
+                >
+                  기분: {MOOD_CONFIG[diary.moodScore].label}
+                </span>
+              </>
+            )}
           </div>
         </div>
 
         {/* 본문 영역 */}
         <article className="prose prose-slate max-w-none">
-          {diary.content ? (
-            <div
-              className="community-content-view text-[17px] leading-[1.8] text-slate-700"
-              dangerouslySetInnerHTML={{ __html: diary.content }}
-            />
-          ) : (
-            <p className="text-center text-slate-300 py-20">
-              내용이 없는 기록입니다.
-            </p>
-          )}
+          {(() => {
+            const blocks =
+              diary.contentBlocks && diary.contentBlocks.length > 0
+                ? diary.contentBlocks
+                : diary.content
+                  ? htmlToDiaryBlocks(diary.content)
+                  : [];
+
+            if (blocks.length > 0) {
+              return (
+                <div className="space-y-6 text-[17px] leading-[1.8] text-slate-700">
+                  {blocks.map((block) => {
+                    if (block.type === "image" && block.imageUrl) {
+                      return (
+                        <figure key={block.id} className="my-6">
+                          {/* eslint-disable-next-line @next/next/no-img-element */}
+                          <img
+                            src={block.imageUrl}
+                            alt={block.filename || "첨부 이미지"}
+                            className="mx-auto block max-w-full rounded-2xl shadow-md"
+                          />
+                        </figure>
+                      );
+                    }
+                    if (block.type === "text" && block.text) {
+                      return (
+                        <p key={block.id} className="whitespace-pre-wrap">
+                          {block.text}
+                        </p>
+                      );
+                    }
+                    return null;
+                  })}
+                </div>
+              );
+            }
+
+            return (
+              <p className="text-center text-slate-300 py-20">
+                내용이 없는 기록입니다.
+              </p>
+            );
+          })()}
         </article>
 
         {/* 푸터 */}

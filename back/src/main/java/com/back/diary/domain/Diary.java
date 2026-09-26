@@ -38,14 +38,21 @@ public class Diary extends BaseEntity {
     @JsonProperty("isPrivate")
     private boolean isPrivate = true;
 
+    @Column(nullable = true)
+    private Integer moodScore;
+
+    @Column(nullable = true, length = 500)
+    private String emotionTags;
+
+    @Column(nullable = true, length = 500)
+    private String triggerTags;
 
     public void updateImageUrl(String imageUrl) {
         this.imageUrl = imageUrl;
     }
 
-
     @Builder
-    public Diary(Long memberId, String nickname, String title, String content,String imageUrl, String categoryName, boolean isPrivate) {
+    public Diary(Long memberId, String nickname, String title, String content, String imageUrl, String categoryName, boolean isPrivate, Integer moodScore, String emotionTags, String triggerTags) {
         this.memberId = memberId;
         this.nickname = (nickname == null) ? "익명" : nickname;
         this.title = title;
@@ -53,10 +60,14 @@ public class Diary extends BaseEntity {
         this.categoryName = categoryName;
         this.imageUrl = imageUrl;
         this.isPrivate = isPrivate;
+        this.moodScore = moodScore;
+        this.emotionTags = emotionTags;
+        this.triggerTags = triggerTags;
     }
 
     public static Diary create(Long memberId, String nickname, String title, String content,
-                               String categoryName, String imageUrl, boolean isPrivate) {
+                               String categoryName, String imageUrl, boolean isPrivate,
+                               Integer moodScore, String emotionTags, String triggerTags) {
         String finalNickname = (nickname == null || nickname.isBlank()) ? "익명" : nickname;
 
         return Diary.builder()
@@ -67,15 +78,31 @@ public class Diary extends BaseEntity {
                 .categoryName(categoryName)
                 .imageUrl(imageUrl)
                 .isPrivate(isPrivate)
+                .moodScore(moodScore)
+                .emotionTags(emotionTags)
+                .triggerTags(triggerTags)
                 .build();
     }
 
-    public void modify(String title, String content,String newImageUrl, String categoryName,boolean isPrivate) {
+    public static Diary create(Long memberId, String nickname, String title, String content,
+                               String categoryName, String imageUrl, boolean isPrivate) {
+        return create(memberId, nickname, title, content, categoryName, imageUrl, isPrivate, null, null, null);
+    }
+
+    public void modify(String title, String content, String newImageUrl, String categoryName, boolean isPrivate,
+                       Integer moodScore, String emotionTags, String triggerTags) {
         this.title = title;
         this.content = content;
         this.categoryName = categoryName;
-        this.imageUrl  = newImageUrl;
+        this.imageUrl = newImageUrl;
         this.isPrivate = isPrivate;
+        this.moodScore = moodScore;
+        this.emotionTags = emotionTags;
+        this.triggerTags = triggerTags;
+    }
+
+    public void modify(String title, String content, String newImageUrl, String categoryName, boolean isPrivate) {
+        modify(title, content, newImageUrl, categoryName, isPrivate, this.moodScore, this.emotionTags, this.triggerTags);
     }
 
     public void updateRepresentativeImage(String uploadedUrl, String requestUrl, List<String> extractedUrls) {
@@ -109,6 +136,9 @@ public class Diary extends BaseEntity {
         this.categoryName = req.categoryName();
         this.imageUrl = newImageUrl;
         this.isPrivate = req.isPrivate();
+        this.moodScore = req.moodScore();
+        this.emotionTags = req.emotionTags();
+        this.triggerTags = req.triggerTags();
     }
 
     public boolean isImageChanged(String requestImageUrl) {
