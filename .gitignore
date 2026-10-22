@@ -30,3 +30,5 @@ docs
 !back/src/main/java/com/back/**/docs/
 !back/src/main/java/com/back/**/docs/*.java
 AGENTS.md
+CLAUDE.md
+.claude/
